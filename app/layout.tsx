@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Kanit } from "next/font/google";
 import "./globals.css";
 import { CookiesProvider } from 'next-client-cookies/server';
-
+import { Analytics } from "@vercel/analytics/react"
 
 
 const geistSans = Geist({
@@ -34,6 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${kanit.className} antialiased`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );
