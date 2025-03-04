@@ -17,8 +17,12 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path",
-        destination: "http://app.sa.ac.th:3002/:path",
+        source: "/api/catalogy/all",
+        destination: "http://app.sa.ac.th:3002/catalogy/all",
+      },
+      {
+        source: "/api/catalogy/:tId",
+        destination: "http://app.sa.ac.th:3002/delete/:tId",
       },
       
     ];
