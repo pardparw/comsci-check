@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter } from 'next/navigation'
 import Image from "next/image"
 import NavBar from "@/app/components/NavBar"
@@ -9,7 +9,6 @@ import { formatDate } from "@/app/utils/formatDate"
 import { checkCookie, LoadRole } from "@/app/utils/checkCookie"
 import Swal from "sweetalert2"
 
-
 export default function Page({
   params,
 }: {
@@ -17,29 +16,27 @@ export default function Page({
 }) {
   const router = useRouter();
   const [slug, setSlug] = useState("Item");
-  const [items, setItems] = useState([]);
-  const [borrowInfo, setBorrowInfo] = useState<any[]>([]);
-  const [ItemInfo, setItemInfo] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
+  const [borrowInfo, setBorrowInfo] = useState<any>({});
+  const [itemInfo, setItemInfo] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [Cookie, SetCookie] = useState("")
-  const [Role, SetRole] = useState("")
-
+  const [error, setError] = useState<string | null>(null);
+  const [cookie, setCookie] = useState("");
+  const [role, setRole] = useState("");
 
   useEffect(() => {
-
-    SetCookie(checkCookie()!)
-    SetRole(LoadRole()!)
+    setCookie(checkCookie() || "");
+    setRole(LoadRole() || "");
 
     const fetchData = async () => {
       try {
-        // Use params directly since it's no longer a Promise in modern Next.js
-        const catalogName = (await params).slug
+        // Use params directly
+        const catalogName =  (await params).slug;
         setSlug(catalogName);
         setIsLoading(true);
 
         // Use environment variable safely with fallback
-
+   
         const response = await fetch(`http://${process.env.DOMAIN}:3002/item/all/${catalogName}`);
 
         if (!response.ok) {
@@ -57,38 +54,32 @@ export default function Page({
     };
 
     fetchData();
-  }, []); // Added dependency on params.slug
+  }, []); // Correct dependency
 
- 
-
-  const handleEditClick = (e: any, itemId: any) => {
+  const handleEditClick = (e: React.MouseEvent, itemId: string) => {
     e.stopPropagation();
     router.push(`../edit/item/${itemId}`);
   };
 
-
-
-  const handleSeeBorrow = (e: any, borrowData: any) => {
+  const handleSeeBorrow = (e: React.MouseEvent, borrowData: any) => {
     e.stopPropagation();
 
     if (borrowData?.bSumCount > 0) {
-      document.getElementById('borrow_modal')?.showModal();
+      const modal = document.getElementById('borrow_modal') as HTMLDialogElement;
+      if (modal) modal.showModal();
       setBorrowInfo(borrowData);
     }
   };
-  const handleSeeItem = (e: any, ItemData: any) => {
+
+  const handleSeeItem = (e: React.MouseEvent, itemData: any) => {
     e.stopPropagation();
-
-
-    document.getElementById('Item_modal')?.showModal();
-    setItemInfo(ItemData);
-
+    const modal = document.getElementById('Item_modal') as HTMLDialogElement;
+    if (modal) modal.showModal();
+    setItemInfo(itemData);
   };
 
-
-
-  //Delete
-  const DeleteItems = async (e: any, oId: any) => {
+  // Delete item
+  const deleteItems = async (e: React.MouseEvent, oId: string) => {
     e.stopPropagation();
 
     let timerInterval: number;
@@ -102,8 +93,8 @@ export default function Page({
       confirmButtonText: "ลบ",
       cancelButtonText: "ยกเลิก"
     });
+    
     if (!result.isConfirmed) return;
-
 
     Swal.fire({
       title: "กำลังลบ",
@@ -118,31 +109,26 @@ export default function Page({
     });
 
     try {
-
-
+    
       let response = await fetch(`http://${process.env.DOMAIN}:3002/item/delete/${oId}`, {
         method: "DELETE",
-
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
-
+      await response.json();
 
       Swal.fire({
         icon: "success",
         title: "ลบสำเร็จ!",
         showCloseButton: true,
         confirmButtonText: "กลับ"
-      }).then((result) => {
+      }).then(() => {
         const updatedData = items.filter((item: any) => item.oId !== oId);
-        setItems(updatedData)
+        setItems(updatedData);
       });
-
-
     } catch (error: any) {
       console.error("Error sending request:", error);
       Swal.fire({
@@ -153,6 +139,7 @@ export default function Page({
       });
     }
   }
+
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
@@ -188,7 +175,7 @@ export default function Page({
                 >
                   <Image
                     onClick={(e) => handleSeeItem(e, item)}
-                    src={`http://${process.env.DOMAIN}/comsci_chi/add/uploads/${item["oImg"]}`}
+                    src={`http://${process.env.DOMAIN}/comsci_chi/add/uploads/${item.oImg}`}
                     width={166}
                     height={122}
                     alt={"Item image"}
@@ -196,11 +183,10 @@ export default function Page({
                   />
 
                   <div className="mt-[10px] pl-[140px]">
-                    {Cookie != "" && Role == "admin" ? (
-
+                    {cookie !== "" && role === "admin" ? (
                       <div className="flex flex-wrap flex-col gap-2 ">
                         <button
-                          onClick={(e) => handleEditClick(e, item["oId"])}
+                          onClick={(e) => handleEditClick(e, item.oId)}
                           aria-label="Edit item"
                           className="text-[#0055ff] hover:text-[#777] transition-colors duration-300"
                         >
@@ -211,7 +197,7 @@ export default function Page({
                         </button>
 
                         <button
-                          onClick={(e) => DeleteItems(e, item["oId"])}
+                          onClick={(e) => deleteItems(e, item.oId)}
                           aria-label="Delete item"
                           className="text-[#ff0000] hover:text-[#777] transition-colors duration-300"
                         >
@@ -220,30 +206,30 @@ export default function Page({
                           </svg>
                         </button>
                       </div>
-                    ) :
-                      <div className="h-[40px]">
-                      </div>}
+                    ) : (
+                      <div className="h-[40px]"></div>
+                    )}
                   </div>
 
                   <div className="w-[135px]">
                     <div className="mt-[-45px] text-sm text-[#777] pl-[5px]">
-                      <h2 className="w-[130px] h-[20px] truncate font-medium" title={item["oName"]}>{item["oName"]}</h2>
+                      <h2 className="w-[130px] h-[20px] truncate font-medium" title={item.oName}>{item.oName}</h2>
                     </div>
 
                     <div className="flex flex-col pl-[5px]">
-                      <p>จำนวน: {item["oRemaining"]}</p>
+                      <p>จำนวน: {item.oRemaining}</p>
 
                       <button
                         className="underline text-left cursor-pointer"
-                        onClick={(e) => handleSeeBorrow(e, item["Borrow"])}
-                        disabled={!item["Borrow"]?.bSumCount}
+                        onClick={(e) => handleSeeBorrow(e, item.Borrow)}
+                        disabled={!item.Borrow?.bSumCount}
                       >
                         ยืมไป: {item.Borrow?.bSumCount || 0}
                       </button>
 
-                      {item["oRemaining"] > 0 ? (
+                      {item.oRemaining > 0 ? (
                         <button
-                          onClick={() => router.push(`../../borrow/${item["oId"]}`)}
+                          onClick={() => router.push(`../../borrow/${item.oId}`)}
                           className="font-bold text-[#71C55D] underline text-left cursor-pointer"
                         >
                           ต้องการยืม?
@@ -253,7 +239,7 @@ export default function Page({
                       )}
 
                       <p className="text-[11px] pt-[5px]">
-                        LastUpdate: {formatDate(item["oDate"])}
+                        LastUpdate: {formatDate(item.oDate)}
                       </p>
                     </div>
                   </div>
@@ -262,47 +248,39 @@ export default function Page({
             </div>
           )}
 
-          {Cookie != "" && Role == "admin" ? (
-            <div className="flex  justify-center  w-[100%] h-[2.5cm] mt-8 mb-4 ">
+          {cookie !== "" && role === "admin" ? (
+            <div className="flex justify-center w-[100%] h-[2.5cm] mt-8 mb-4">
               <div onClick={() => { router.push("../add/item") }} className="flex flex-col items-center cursor-pointer duration-300">
-
-                <div className=""><svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" className="bi bi-plus-circle" viewBox="0 0 16 16">
-                  <path className="text-[#71C55D]" d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                  <path className="text-[#777]" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-                </svg>
-
+                <div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" className="bi bi-plus-circle" viewBox="0 0 16 16">
+                    <path className="text-[#71C55D]" d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                    <path className="text-[#777]" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                  </svg>
                 </div>
-                <div className="mt-2"><h1 className="text-2xl text-[#71C55D]">เพิ่มสิ่งของ</h1>
+                <div className="mt-2">
+                  <h1 className="text-2xl text-[#71C55D]">เพิ่มสิ่งของ</h1>
                 </div>
-
               </div>
             </div>
-
-
-          ) : ("")}
-
-
-
+          ) : null}
 
           {/* Borrow Information Modal */}
           <dialog id="borrow_modal" className="modal">
             <div className="modal-box text-center text-white">
               <h3 className="font-bold text-lg">ยืมโดย</h3>
 
-              {borrowInfo && borrowInfo.bInfo && borrowInfo.bInfo.length > 0 ? (
+              {borrowInfo?.bInfo && borrowInfo.bInfo.length > 0 ? (
                 <ul className="py-4 flex flex-col items-center">
-                  {borrowInfo.bInfo.map((value: any, index: any) => (
-
-                    <div key={index} className=" w-[80%]  border border-dashed rounded-lg mb-2 p-2">
+                  {borrowInfo.bInfo.map((value: any, index: number) => (
+                    <div key={index} className="w-[80%] border border-dashed rounded-lg mb-2 p-2">
                       <li>ชื่อ: {value.bRealName} </li>
                       <li>วันที่ยืม: {formatDate(value.bDStart)} </li>
                       <li>วันที่คืน: {formatDate(value.bDStart)} </li>
-                      <li>เบอร์โทร: {value.bPhone != "" ? value.bPhone : "-"} </li>
+                      <li>เบอร์โทร: {value.bPhone !== "" ? value.bPhone : "-"} </li>
                       <li>จำนวน: {value.bCount} </li>
-                      <li>เหตุผล: {value.bReason != "" ? value.bReason : "-"} </li>
-                      <li>สถานะ: {value.bStatus == "borrow" ? "กำลังยืม" : "รอคุณครูยืนยันการคืน"}</li>
+                      <li>เหตุผล: {value.bReason !== "" ? value.bReason : "-"} </li>
+                      <li>สถานะ: {value.bStatus === "borrow" ? "กำลังยืม" : "รอคุณครูยืนยันการคืน"}</li>
                     </div>
-
                   ))}
                 </ul>
               ) : (
@@ -321,21 +299,17 @@ export default function Page({
             </form>
           </dialog>
 
-
+          {/* Item Detail Modal */}
           <dialog id="Item_modal" className="modal">
             <div className="modal-box text-center text-white">
               <h3 className="font-bold text-lg">รายละเอียด</h3>
 
-
               <ul className="py-4 flex flex-col items-center">
-
-
-                <div className=" w-[80%]  border border-dashed rounded-lg mb-2 p-2">
-                  <li>ชื่อ: {ItemInfo["oName"]} </li>
-                  <li>สถานะ: {ItemInfo["oStatus"]} </li>
-                  <li>อุปกรณ์: {ItemInfo["oAccessory"]} </li>
-                  <li>เลขที่คุรุภัณฑ์/ปีจัดซื้อ: {ItemInfo["oSerial"]} </li>
-                
+                <div className="w-[80%] border border-dashed rounded-lg mb-2 p-2">
+                  <li>ชื่อ: {itemInfo.oName} </li>
+                  <li>สถานะ: {itemInfo.oStatus} </li>
+                  <li>อุปกรณ์: {itemInfo.oAccessory} </li>
+                  <li>เลขที่คุรุภัณฑ์/ปีจัดซื้อ: {itemInfo.oSerial} </li>
                 </div>
               </ul>
 
@@ -350,7 +324,6 @@ export default function Page({
               <button>close</button>
             </form>
           </dialog>
-
         </div>
       </main>
 
