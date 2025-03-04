@@ -39,7 +39,8 @@ export default function Home() {
       try {
         setIsLoading(true);
         const response = await fetch(`http://${process.env.DOMAIN}:3002/catalogy/all`, {
-          referrerPolicy: "unsafe-url"
+          mode: "cors",
+          referrerPolicy: "unsafe-url",
         });
 
         if (!response.ok) {
@@ -111,6 +112,7 @@ export default function Home() {
 
       let response = await fetch(`http://${process.env.DOMAIN}:3002/catalogy/delete/${tId}`, {
         method: "DELETE",
+        mode: "cors",
         referrerPolicy: "unsafe-url"
       });
 
