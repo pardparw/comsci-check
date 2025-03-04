@@ -35,7 +35,7 @@ function page() {
 
         try {
 
-            let response = await fetch(`http://${process.env.DOMAIN}:3002/user/login`, {
+            let response = await fetch(`/api/user/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

@@ -110,7 +110,7 @@ export default function Home() {
     try {
 
 
-      let response = await fetch(`/api/catalogy/${tId}`, {
+      let response = await fetch(`/api/catalogy${tId}`, {
         method: "DELETE",
         mode: "cors",
         referrerPolicy: "unsafe-url"

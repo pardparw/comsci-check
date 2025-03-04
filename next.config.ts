@@ -25,6 +25,11 @@ const nextConfig: NextConfig = {
         destination: "http://app.sa.ac.th:3002/delete/:tId",
       },
       
+      {
+        source: "/api/user/login",
+        destination: "http://app.sa.ac.th:3002/user/login",
+      },
+      
     ];
   },
 };
