@@ -36,7 +36,9 @@ export default function Page({ params }: { params: Params })
 
         // Use environment variable safely with fallback
    
-        const response = await fetch(`http://${process.env.DOMAIN}:3002/item/all/${catalogName}`);
+        const response = await fetch(`http://${process.env.DOMAIN}:3002/item/all/${catalogName}`, {
+          referrerPolicy: "unsafe-url"
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);

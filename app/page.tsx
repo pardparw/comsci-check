@@ -38,7 +38,9 @@ export default function Home() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`http://${process.env.DOMAIN}:3002/catalogy/all`);
+        const response = await fetch(`http://${process.env.DOMAIN}:3002/catalogy/all`, {
+          referrerPolicy: "unsafe-url"
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -109,7 +111,7 @@ export default function Home() {
 
       let response = await fetch(`http://${process.env.DOMAIN}:3002/catalogy/delete/${tId}`, {
         method: "DELETE",
-
+        referrerPolicy: "unsafe-url"
       });
 
       if (!response.ok) {

@@ -11,7 +11,9 @@ import Swal from 'sweetalert2'
 const fetchData = async (setBorrowItem: Function, setError: Function, setIsLoading: Function) => {
     try {
         setIsLoading(true);
-        const response = await fetch(`http://${process.env.DOMAIN}:3002/borrow/check/`);
+        const response = await fetch(`http://${process.env.DOMAIN}:3002/borrow/check/`, {
+            referrerPolicy: "unsafe-url"
+        });
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -75,6 +77,7 @@ function page() {
         try {
             const response = await fetch(`http://${process.env.DOMAIN}:3002/borrow/returncheck/${bId}`, {
                 method: "PUT",
+                referrerPolicy: "unsafe-url"
             });
 
             if (!response.ok) {
