@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, use } from "react"
 import { useRouter } from 'next/navigation'
 import Image from "next/image"
 import NavBar from "@/app/components/NavBar"
@@ -9,13 +9,11 @@ import { formatDate } from "@/app/utils/formatDate"
 import { checkCookie, LoadRole } from "@/app/utils/checkCookie"
 import Swal from "sweetalert2"
 
-export default function Page({
-  params,
-}: {
-  params: { slug: string }
-}) {
+type Params = Promise<{ slug: string[] }>;
+export default function Page({ params }: { params: Params })
+{
   const router = useRouter();
-  const [slug, setSlug] = useState("Item");
+  const [slugs, setSlug] = useState("Item");
   const [items, setItems] = useState<any[]>([]);
   const [borrowInfo, setBorrowInfo] = useState<any>({});
   const [itemInfo, setItemInfo] = useState<any>({});
@@ -32,8 +30,9 @@ export default function Page({
       try {
         // Use params directly
         const catalogName =  (await params).slug;
-        setSlug(catalogName);
+        setSlug(catalogName.toString());
         setIsLoading(true);
+        // console.log(catalogName)
 
         // Use environment variable safely with fallback
    
@@ -146,7 +145,7 @@ export default function Page({
         <NavBar />
 
         <div className="relative text-[#777] font-bold pt-[2.5cm] font-medium">
-          <h1 className="text-center text-3xl">{slug}</h1>
+          <h1 className="text-center text-3xl">{slugs}</h1>
 
           {isLoading && (
             <div className="text-center mt-8 text-black">
