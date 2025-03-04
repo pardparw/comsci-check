@@ -78,7 +78,7 @@ export default function Page({
 
 
     const sendPostRequest = async () => {
-        let timerInterval: number;
+        
 
 
         // Check if essential form data is missing
@@ -93,17 +93,6 @@ export default function Page({
         }
 
 
-        Swal.fire({
-            title: "กำลังแก้ไข",
-            timer: 2000,
-            timerProgressBar: false,
-            didOpen: () => {
-                Swal.showLoading();
-            },
-            willClose: () => {
-                clearInterval(timerInterval!);
-            }
-        });
 
         try {
 
@@ -172,6 +161,20 @@ export default function Page({
             title: "ข้อมูลไม่ครบ!",
             text: "กรุณากรอกข้อมูลให้ครบถ้วนก่อนแก้ไข",
             confirmButtonText: "ตกลง"
+        });
+
+        let timerInterval: number;
+
+        Swal.fire({
+          title: "กำลังแก้ไข",
+          timer: 2000,
+          timerProgressBar: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+          willClose: () => {
+            clearInterval(timerInterval!);
+          }
         });
 
         setIsUploading(true);

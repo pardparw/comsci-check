@@ -26,7 +26,6 @@ function page() {
 
 
   const sendPostRequest = async () => {
-    let timerInterval: number;
 
 
     // Check if essential form data is missing
@@ -41,17 +40,6 @@ function page() {
     }
 
 
-    Swal.fire({
-      title: "กำลังเพิ่ม",
-      timer: 2000,
-      timerProgressBar: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-      willClose: () => {
-        clearInterval(timerInterval!);
-      }
-    });
 
     try {
 
@@ -109,14 +97,31 @@ function page() {
       });
       return;
     }
-    if (!selectedFile) return  Swal.fire({
+    if (!selectedFile) return Swal.fire({
       icon: "warning",
       title: "ข้อมูลไม่ครบ!",
       text: "กรุณากรอกข้อมูลให้ครบถ้วนก่อนเพิ่ม",
       confirmButtonText: "ตกลง"
     });
 
+
+
     setIsUploading(true);
+
+    let timerInterval: number;
+
+    Swal.fire({
+      title: "กำลังเพิ่ม",
+      timer: 2000,
+      timerProgressBar: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      willClose: () => {
+        clearInterval(timerInterval!);
+      }
+    });
+
     const formDatas = new FormData();
     formDatas.append("image", selectedFile);
 
@@ -129,7 +134,7 @@ function page() {
       const data = await response.json();
       if (response.ok) {
 
-        
+
         formData.tImg = data.imageUrl
         sendPostRequest()
       } else {
@@ -142,7 +147,7 @@ function page() {
         text: `Error uploading image: ${error}`,
         confirmButtonText: "ลองอีกครั้ง"
       });
-     
+
     } finally {
       setIsUploading(false);
     }
@@ -197,7 +202,7 @@ function page() {
 
 
 
-          <button onClick={uploadImage} className="mt-10 bg-[#71C55D] text-white w-[80%] h-[65px] text-xl rounded-3xl cursor-pointer duration-400 hover:bg-white hover:text-[#71C55D] hover:outline-[#71C55D] hover:outline" disabled = {isUploading}> {isUploading ? "กำลังเพิ่ม..." : "เพิ่ม"}</button>
+          <button onClick={uploadImage} className="mt-10 bg-[#71C55D] text-white w-[80%] h-[65px] text-xl rounded-3xl cursor-pointer duration-400 hover:bg-white hover:text-[#71C55D] hover:outline-[#71C55D] hover:outline" disabled={isUploading}> {isUploading ? "กำลังเพิ่ม..." : "เพิ่ม"}</button>
 
         </div>
       </main>

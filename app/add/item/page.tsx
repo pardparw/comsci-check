@@ -40,22 +40,23 @@ function page() {
   };
 
 
-  const accessoryss = [false, false, false, false];
-  const accessoryName = ["เมาส์", "คีย์บอร์ด", "สายไฟ", "สายชารจ์"];
-  function Accessory(index: number) {
-    accessoryss[index] = !accessoryss[index];
-    const ArLen = accessoryss.length;
-    let Accessorys: string = "";
-    accessoryss.map((value, index) => {
-      if (value) {
+  const [accessoryss, setAccessoryss] = useState<boolean[]>(new Array(4).fill(false));
+  const accessoryNames = ["เมาส์", "คีย์บอร์ด", "สายไฟ", "สายชารจ์"];
 
-        Accessorys += `${accessoryName[index]} `
-      }
-    })
-    formData.oAccessory = Accessorys
+  function toggleAccessory(index: number) {
+    setAccessoryss((prev) => {
+      const updatedAccessories = [...prev]; // Create a new array to avoid mutation
+      updatedAccessories[index] = !prev[index];
 
+      // Update form data
+      formData.oAccessory = updatedAccessories
+        .map((value, i) => (value ? accessoryNames[i] : null))
+        .filter(Boolean) // Remove null values
+        .join(" ");
+
+      return updatedAccessories;
+    });
   }
-
 
   const sendPostRequest = async () => {
 
@@ -75,10 +76,10 @@ function page() {
       return;
     }
 
-    
+
     try {
 
-      let response = await fetch(`/api/item/delete`, {
+      let response = await fetch(`/api/item/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -310,11 +311,17 @@ function page() {
                 }`}
             >
               <div className="flex gap-5 flex-wrap ">
-                <label><input type="checkbox" id="mouse" className="checkbox checkbox-success" onChange={() => Accessory(0)}></input> เมาส์</label>
-                <label><input type="checkbox" id="keyboard" className="checkbox checkbox-success" onChange={() => Accessory(1)} ></input> คีย์บอร์ด</label>
-                <label><input type="checkbox" id="wire" className="checkbox checkbox-success" onChange={() => Accessory(2)}></input> สายไฟ</label>
-                <label><input type="checkbox" id="charging" className="checkbox checkbox-success" onChange={() => Accessory(3)}></input> สายชารจ์</label>
-
+                {accessoryNames.map((name, index) => (
+                  <label key={index}>
+                    <input
+                      type="checkbox"
+                      className="checkbox checkbox-success"
+                      onChange={() => toggleAccessory(index)}
+                      checked={accessoryss[index]}
+                    />
+                    {name}
+                  </label>
+                ))}
 
 
               </div>
@@ -322,16 +329,16 @@ function page() {
               <p>การใช้งาน</p>
               <div className="flex flex-col mt-[5px]">
                 <div>
-                  <input type="radio" id="oSatus1" name="statts" value="ปกติ" className='radio radio-accent' onChange={() => { formData.oStatus = "ปกติ" }} defaultChecked={true}></input>
+                  <input type="radio" id="oSatus1" name="statts" value="ปกติ" className='radio radio-accent' onChange={() => setFormData((prevData) => ({ ...prevData, oStatus: "ปกติ" }))} defaultChecked={formData.oStatus == "ปกติ" ? true : false}></input>
                   <label form="html"> ปกติ</label>
 
                 </div>
                 <div>
-                  <input type="radio" id="oSatus2" name="statts" className='radio radio-accent' value="เสีย" onChange={() => { formData.oStatus = "เสีย" }}></input>
+                  <input type="radio" id="oSatus2" name="statts" className='radio radio-accent' value="เสีย" onChange={() => setFormData((prevData) => ({ ...prevData, oStatus: "เสีย" }))} defaultChecked={formData.oStatus == "เสีย" ? true : false}></input>
                   <label form="html"> เสีย</label>
                 </div>
                 <div>
-                  <input type="radio" id="oSatus3" name="statts" className='radio radio-accent' value="ส่งซ่อม" onChange={() => { formData.oStatus = "ส่งซ่อม" }}></input>
+                  <input type="radio" id="oSatus3" name="statts" className='radio radio-accent' value="ส่งซ่อม" onChange={() => setFormData((prevData) => ({ ...prevData, oStatus: "ส่งซ่อม" }))} defaultChecked={formData.oStatus == "ส่งซ่อม" ? true : false}></input>
                   <label form="html"> ส่งซ่อม</label>
                 </div>
               </div>

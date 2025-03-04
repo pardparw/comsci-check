@@ -60,12 +60,12 @@ export default function Page({
 
                 // Use environment variable safely with fallback
 
-                const response = await fetch(`/api/item/item`,{
+                const response = await fetch(`/api/item/item`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
 
                     body: JSON.stringify({
-                        oId : slug
+                        oId: slug
                     })
                 });
 
@@ -89,7 +89,7 @@ export default function Page({
                 formData.oDate = result[0]["oDate"];
                 setOUnit(result[0]["oUnit"]);
                 setoStatus(result[0]["oStatus"]);
-                
+
                 let Acc = [false, false, false, false]
                 if (formData?.oAccessory?.trim()) {
                     formData.oAccessory.split(" ").forEach((value: string, index: number) => {
@@ -131,6 +131,8 @@ export default function Page({
 
     const accessoryName = ["เมาส์", "คีย์บอร์ด", "สายไฟ", "สายชารจ์"]; // Accessories list
     const [accessoryss, setAccessoryss] = useState<boolean[]>(new Array(accessoryName.length).fill(false));
+
+
     // const [formData, setFormData] = useState<{ oAccessory: string }>({ oAccessory: "" });
 
     function Accessory(index: number) {
@@ -149,6 +151,7 @@ export default function Page({
             return newAccessories;
         });
     }
+
 
 
 
@@ -385,8 +388,8 @@ export default function Page({
                         <select
                             name="unit"
                             id="object-unit"
-                            value={oUnit}
-                            onChange={(e) => formData.oType = (e.target.value)}
+                            value={!isLoading ? formData.oUnit : "-"}
+                            onChange={(e) => {setFormData((prevData) => ({ ...prevData, oUnit: e.target.value }));}}
                             className="w-[50%] h-[50px] rounded-3xl bg-white solid outline-[#71C55D] outline text-center"
                             disabled={isLoading} // Disable selection while loading
                         >
@@ -396,7 +399,9 @@ export default function Page({
                             <option value="ชิ้น">ชิ้น</option>
                             <option value="เครื่อง">เครื่อง</option>
                         </select>
-                        <select name="unit" id="object-catalogy" value={!isLoading ? formData.oType : "-"} className='w-[50%] h-[50px] rounded-3xl  bg-white solid outline-[#71C55D] outline text-center' onChange={(e) => { formData.oType = (e.target.value) }}>
+            
+
+                        <select name="unit" id="object-catalogy" value={!isLoading ? formData.oType : "-"} className='w-[50%] h-[50px] rounded-3xl  bg-white solid outline-[#71C55D] outline text-center' onChange={(e) => { setFormData((prevData) => ({ ...prevData, oType: e.target.value })); }}>
                             <option className='text-[#777]' value="-" disabled={true}>หมวดหมู่</option>
                             {Catalogy && (
                                 Catalogy.map((value: any, index: any) => (
@@ -455,16 +460,18 @@ export default function Page({
                             <p>การใช้งาน</p>
                             <div className="flex flex-col mt-[5px]">
                                 <div>
-                                    <input type="radio" id="oSatus1" name="statts" value="ปกติ" className='radio radio-accent' onChange={() => { formData.oStatus = "ปกติ" }} defaultChecked={oStatus == "ปกติ" ? true : false}></input>
+                                    <input type="radio" id="oSatus1" name="statts" value="ปกติ" className='radio radio-accent' onChange={() => setFormData((prevData) => ({ ...prevData, oStatus: "ปกติ" }))} defaultChecked={formData.oStatus == "ปกติ" ? true : false}></input>
                                     <label form="html"> ปกติ</label>
 
                                 </div>
+
+
                                 <div>
-                                    <input type="radio" id="oSatus2" name="statts" className='radio radio-accent' value="เสีย" onChange={() => { formData.oStatus = "เสีย" }} defaultChecked={oStatus == "เสีย" ? true : false}></input>
+                                    <input type="radio" id="oSatus2" name="statts" className='radio radio-accent' value="เสีย" onChange={() => setFormData((prevData) => ({ ...prevData, oStatus: "เสีย" }))} defaultChecked={formData.oStatus == "เสีย" ? true : false}></input>
                                     <label form="html"> เสีย</label>
                                 </div>
                                 <div>
-                                    <input type="radio" id="oSatus3" name="statts" className='radio radio-accent' value="ส่งซ่อม" onChange={() => { formData.oStatus = "ส่งซ่อม" }} defaultChecked={oStatus == "ส่งซ่อม" ? true : false}></input>
+                                    <input type="radio" id="oSatus3" name="statts" className='radio radio-accent' value="ส่งซ่อม" onChange={() => setFormData((prevData) => ({ ...prevData, oStatus: "ส่งซ่อม" }))} defaultChecked={formData.oStatus == "ส่งซ่อม" ? true : false}></input>
                                     <label form="html"> ส่งซ่อม</label>
                                 </div>
                             </div>
