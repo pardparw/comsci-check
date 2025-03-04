@@ -1,0 +1,360 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter } from 'next/navigation'
+import Image from "next/image"
+import NavBar from "@/app/components/NavBar"
+import Footer from "@/app/components/footer"
+import { formatDate } from "@/app/utils/formatDate"
+import { checkCookie, LoadRole } from "@/app/utils/checkCookie"
+import Swal from "sweetalert2"
+
+
+export default function Page({
+  params,
+}: {
+  params: { slug: string }
+}) {
+  const router = useRouter();
+  const [slug, setSlug] = useState("Item");
+  const [items, setItems] = useState([]);
+  const [borrowInfo, setBorrowInfo] = useState<any[]>([]);
+  const [ItemInfo, setItemInfo] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [Cookie, SetCookie] = useState("")
+  const [Role, SetRole] = useState("")
+
+
+  useEffect(() => {
+
+    SetCookie(checkCookie()!)
+    SetRole(LoadRole()!)
+
+    const fetchData = async () => {
+      try {
+        // Use params directly since it's no longer a Promise in modern Next.js
+        const catalogName = (await params).slug
+        setSlug(catalogName);
+        setIsLoading(true);
+
+        // Use environment variable safely with fallback
+
+        const response = await fetch(`http://${process.env.DOMAIN}:3002/item/all/${catalogName}`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        setItems(result);
+      } catch (err: any) {
+        console.error("Fetching error:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Added dependency on params.slug
+
+ 
+
+  const handleEditClick = (e: any, itemId: any) => {
+    e.stopPropagation();
+    router.push(`../edit/item/${itemId}`);
+  };
+
+
+
+  const handleSeeBorrow = (e: any, borrowData: any) => {
+    e.stopPropagation();
+
+    if (borrowData?.bSumCount > 0) {
+      document.getElementById('borrow_modal')?.showModal();
+      setBorrowInfo(borrowData);
+    }
+  };
+  const handleSeeItem = (e: any, ItemData: any) => {
+    e.stopPropagation();
+
+
+    document.getElementById('Item_modal')?.showModal();
+    setItemInfo(ItemData);
+
+  };
+
+
+
+  //Delete
+  const DeleteItems = async (e: any, oId: any) => {
+    e.stopPropagation();
+
+    let timerInterval: number;
+
+    const result = await Swal.fire({
+      title: "ต้องการลบสิ่งของ",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก"
+    });
+    if (!result.isConfirmed) return;
+
+
+    Swal.fire({
+      title: "กำลังลบ",
+      timer: 2000,
+      timerProgressBar: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      willClose: () => {
+        clearInterval(timerInterval!);
+      }
+    });
+
+    try {
+
+
+      let response = await fetch(`http://${process.env.DOMAIN}:3002/item/delete/${oId}`, {
+        method: "DELETE",
+
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+
+      Swal.fire({
+        icon: "success",
+        title: "ลบสำเร็จ!",
+        showCloseButton: true,
+        confirmButtonText: "กลับ"
+      }).then((result) => {
+        const updatedData = items.filter((item: any) => item.oId !== oId);
+        setItems(updatedData)
+      });
+
+
+    } catch (error: any) {
+      console.error("Error sending request:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด!",
+        text: `Failed to send request. ${error.message}`,
+        confirmButtonText: "ลองอีกครั้ง"
+      });
+    }
+  }
+  return (
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-grow">
+        <NavBar />
+
+        <div className="relative text-[#777] font-bold pt-[2.5cm] font-medium">
+          <h1 className="text-center text-3xl">{slug}</h1>
+
+          {isLoading && (
+            <div className="text-center mt-8 text-black">
+              <p>Loading items...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-center mt-8 text-red-500">
+              <p>Error loading items: {error}</p>
+            </div>
+          )}
+
+          {!isLoading && !error && items.length === 0 && (
+            <div className="text-center mt-8 text-black">
+              <p>No items found in this category.</p>
+            </div>
+          )}
+
+          {!isLoading && !error && items.length > 0 && (
+            <div className="grid min-[450px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 w-[80%] mx-auto mt-8">
+              {items.map((item, index) => (
+                <div
+                  key={index}
+                  className="w-[166px] h-[250px] rounded-2xl bg-[#ffffff50] shadow-lg cursor-pointer"
+                >
+                  <Image
+                    onClick={(e) => handleSeeItem(e, item)}
+                    src={`http://${process.env.DOMAIN}/comsci_chi/add/uploads/${item["oImg"]}`}
+                    width={166}
+                    height={122}
+                    alt={"Item image"}
+                    className="shadow-md h-[122px] rounded-t-2xl object-cover"
+                  />
+
+                  <div className="mt-[10px] pl-[140px]">
+                    {Cookie != "" && Role == "admin" ? (
+
+                      <div className="flex flex-wrap flex-col gap-2 ">
+                        <button
+                          onClick={(e) => handleEditClick(e, item["oId"])}
+                          aria-label="Edit item"
+                          className="text-[#0055ff] hover:text-[#777] transition-colors duration-300"
+                        >
+                          <svg width="16" height="16" fill="currentColor" className="bi bi-pencil-square" viewBox="0 0 16 16">
+                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"></path>
+                            <path d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" fillRule="evenodd"></path>
+                          </svg>
+                        </button>
+
+                        <button
+                          onClick={(e) => DeleteItems(e, item["oId"])}
+                          aria-label="Delete item"
+                          className="text-[#ff0000] hover:text-[#777] transition-colors duration-300"
+                        >
+                          <svg width="16" height="16" fill="currentColor" className="bi bi-trash3-fill" viewBox="0 0 16 16">
+                            <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    ) :
+                      <div className="h-[40px]">
+                      </div>}
+                  </div>
+
+                  <div className="w-[135px]">
+                    <div className="mt-[-45px] text-sm text-[#777] pl-[5px]">
+                      <h2 className="w-[130px] h-[20px] truncate font-medium" title={item["oName"]}>{item["oName"]}</h2>
+                    </div>
+
+                    <div className="flex flex-col pl-[5px]">
+                      <p>จำนวน: {item["oRemaining"]}</p>
+
+                      <button
+                        className="underline text-left cursor-pointer"
+                        onClick={(e) => handleSeeBorrow(e, item["Borrow"])}
+                        disabled={!item["Borrow"]?.bSumCount}
+                      >
+                        ยืมไป: {item.Borrow?.bSumCount || 0}
+                      </button>
+
+                      {item["oRemaining"] > 0 ? (
+                        <button
+                          onClick={() => router.push(`../../borrow/${item["oId"]}`)}
+                          className="font-bold text-[#71C55D] underline text-left cursor-pointer"
+                        >
+                          ต้องการยืม?
+                        </button>
+                      ) : (
+                        <div className="h-6"></div>
+                      )}
+
+                      <p className="text-[11px] pt-[5px]">
+                        LastUpdate: {formatDate(item["oDate"])}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {Cookie != "" && Role == "admin" ? (
+            <div className="flex  justify-center  w-[100%] h-[2.5cm] mt-8 mb-4 ">
+              <div onClick={() => { router.push("../add/item") }} className="flex flex-col items-center cursor-pointer duration-300">
+
+                <div className=""><svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" className="bi bi-plus-circle" viewBox="0 0 16 16">
+                  <path className="text-[#71C55D]" d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                  <path className="text-[#777]" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                </svg>
+
+                </div>
+                <div className="mt-2"><h1 className="text-2xl text-[#71C55D]">เพิ่มสิ่งของ</h1>
+                </div>
+
+              </div>
+            </div>
+
+
+          ) : ("")}
+
+
+
+
+          {/* Borrow Information Modal */}
+          <dialog id="borrow_modal" className="modal">
+            <div className="modal-box text-center text-white">
+              <h3 className="font-bold text-lg">ยืมโดย</h3>
+
+              {borrowInfo && borrowInfo.bInfo && borrowInfo.bInfo.length > 0 ? (
+                <ul className="py-4 flex flex-col items-center">
+                  {borrowInfo.bInfo.map((value: any, index: any) => (
+
+                    <div key={index} className=" w-[80%]  border border-dashed rounded-lg mb-2 p-2">
+                      <li>ชื่อ: {value.bRealName} </li>
+                      <li>วันที่ยืม: {formatDate(value.bDStart)} </li>
+                      <li>วันที่คืน: {formatDate(value.bDStart)} </li>
+                      <li>เบอร์โทร: {value.bPhone != "" ? value.bPhone : "-"} </li>
+                      <li>จำนวน: {value.bCount} </li>
+                      <li>เหตุผล: {value.bReason != "" ? value.bReason : "-"} </li>
+                      <li>สถานะ: {value.bStatus == "borrow" ? "กำลังยืม" : "รอคุณครูยืนยันการคืน"}</li>
+                    </div>
+
+                  ))}
+                </ul>
+              ) : (
+                <p className="py-4">ไม่มีข้อมูลการยืม</p>
+              )}
+
+              <div className="modal-action">
+                <form method="dialog">
+                  <button className="btn">Close</button>
+                </form>
+              </div>
+            </div>
+
+            <form method="dialog" className="modal-backdrop">
+              <button>close</button>
+            </form>
+          </dialog>
+
+
+          <dialog id="Item_modal" className="modal">
+            <div className="modal-box text-center text-white">
+              <h3 className="font-bold text-lg">รายละเอียด</h3>
+
+
+              <ul className="py-4 flex flex-col items-center">
+
+
+                <div className=" w-[80%]  border border-dashed rounded-lg mb-2 p-2">
+                  <li>ชื่อ: {ItemInfo["oName"]} </li>
+                  <li>สถานะ: {ItemInfo["oStatus"]} </li>
+                  <li>อุปกรณ์: {ItemInfo["oAccessory"]} </li>
+                  <li>เลขที่คุรุภัณฑ์/ปีจัดซื้อ: {ItemInfo["oSerial"]} </li>
+                
+                </div>
+              </ul>
+
+              <div className="modal-action">
+                <form method="dialog">
+                  <button className="btn">Close</button>
+                </form>
+              </div>
+            </div>
+
+            <form method="dialog" className="modal-backdrop">
+              <button>close</button>
+            </form>
+          </dialog>
+
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
