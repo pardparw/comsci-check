@@ -77,12 +77,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/api/catalogy/delete",
-        destination: "http://app.sa.ac.th:3002/borrow/add",
+        destination: "http://app.sa.ac.th:3002/catalogy/addeleted",
       },
       
       {
         source: "/api/item/delete",
-        destination: "http://app.sa.ac.th:3002/item/add",
+        destination: "http://app.sa.ac.th:3002/item/delete",
       },
       {
         source: "/api/upload",
