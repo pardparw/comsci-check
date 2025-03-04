@@ -17,9 +17,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/catalogy/all",
-        destination: "http://app.sa.ac.th:3002/catalogy/all",
+        source: "/api/:path",
+        destination: "http://app.sa.ac.th:3002/:path",
       },
+      
     ];
   },
 };

@@ -110,7 +110,7 @@ export default function Home() {
     try {
 
 
-      let response = await fetch(`http://${process.env.DOMAIN}:3002/catalogy/delete/${tId}`, {
+      let response = await fetch(`/api/catalogy/delete/${tId}`, {
         method: "DELETE",
         mode: "cors",
         referrerPolicy: "unsafe-url"
