@@ -31,15 +31,16 @@ export default function Page({
 
     useEffect(() => {
         const fetchData = async () => {
-            let oId = (await params).slug
-            setSlug(oId)
+            let oIds = (await params).slug
+            setSlug(oIds)
 
             try {
                 setIsLoading(true);
                 const response = await fetch(`/api/item/item`, {
                     method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        oId: oId
+                        oId: oIds
                     })
                 });
 

@@ -62,6 +62,8 @@ export default function Page({
 
                 const response = await fetch(`/api/item/item`,{
                     method: "POST",
+                    headers: { "Content-Type": "application/json" },
+
                     body: JSON.stringify({
                         oId : slug
                     })
