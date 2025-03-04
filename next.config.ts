@@ -77,7 +77,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/api/catalogy/delete",
-        destination: "http://app.sa.ac.th:3002/catalogy/addeleted",
+        destination: "http://app.sa.ac.th:3002/catalogy/delete",
       },
       
       {
