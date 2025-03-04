@@ -11,7 +11,7 @@ import Swal from 'sweetalert2'
 const fetchData = async (setBorrowItem: Function, setError: Function, setIsLoading: Function) => {
     try {
         setIsLoading(true);
-        const response = await fetch(`http://${process.env.DOMAIN}:3002/borrow/check/`, {
+        const response = await fetch(`/api/borrow/check`, {
             referrerPolicy: "unsafe-url"
         });
 
@@ -75,9 +75,14 @@ function page() {
 
         // Update the state with filtered data (assuming setBorrowItem is the function to update state)
         try {
-            const response = await fetch(`http://${process.env.DOMAIN}:3002/borrow/returncheck/${bId}`, {
-                method: "PUT",
-                referrerPolicy: "unsafe-url"
+            const response = await fetch(`/api/borrow/returncheck`, {
+                method: "POST",
+                referrerPolicy: "unsafe-url",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    bId: bId
+                })
+                
             });
 
             if (!response.ok) {

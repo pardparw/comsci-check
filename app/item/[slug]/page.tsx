@@ -10,8 +10,7 @@ import { checkCookie, LoadRole } from "@/app/utils/checkCookie"
 import Swal from "sweetalert2"
 
 type Params = Promise<{ slug: string[] }>;
-export default function Page({ params }: { params: Params })
-{
+export default function Page({ params }: { params: Params }) {
   const router = useRouter();
   const [slugs, setSlug] = useState("Item");
   const [items, setItems] = useState<any[]>([]);
@@ -29,15 +28,22 @@ export default function Page({ params }: { params: Params })
     const fetchData = async () => {
       try {
         // Use params directly
-        const catalogName =  (await params).slug;
+        const catalogName = (await params).slug;
         setSlug(catalogName.toString());
         setIsLoading(true);
         // console.log(catalogName)
 
         // Use environment variable safely with fallback
-   
-        const response = await fetch(`http://${process.env.DOMAIN}:3002/item/all/${catalogName}`, {
-          referrerPolicy: "unsafe-url"
+
+        const response = await fetch(`/api/item/all`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            oName: catalogName
+          })
+
         });
 
         if (!response.ok) {
@@ -94,7 +100,7 @@ export default function Page({ params }: { params: Params })
       confirmButtonText: "ลบ",
       cancelButtonText: "ยกเลิก"
     });
-    
+
     if (!result.isConfirmed) return;
 
     Swal.fire({
@@ -110,9 +116,13 @@ export default function Page({ params }: { params: Params })
     });
 
     try {
-    
-      let response = await fetch(`http://${process.env.DOMAIN}:3002/item/delete/${oId}`, {
-        method: "DELETE",
+
+      let response = await fetch(`/api/item/delete`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          oId: oId
+        })
       });
 
       if (!response.ok) {

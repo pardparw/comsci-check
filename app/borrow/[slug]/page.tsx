@@ -36,7 +36,12 @@ export default function Page({
 
             try {
                 setIsLoading(true);
-                const response = await fetch(`http://${process.env.DOMAIN}:3002/item/item/${oId}`);
+                const response = await fetch(`/api/item/item`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        oId: oId
+                    })
+                });
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -73,7 +78,7 @@ export default function Page({
                 router.push("../login")
             });
         }
-        
+
     }, []);
 
 
@@ -92,9 +97,9 @@ export default function Page({
         const userCookie = checkCookie()
         formData.oId = slug
         formData.uId = userCookie!;
-       
 
-        
+
+
         // Check if essential form data is missing
         if (!formData.sDate || !formData.eDate) {
             Swal.fire({
@@ -121,7 +126,7 @@ export default function Page({
 
         try {
 
-            let response = await fetch(`http://${process.env.DOMAIN}:3002/borrow/add`, {
+            let response = await fetch(`/api/borrow/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

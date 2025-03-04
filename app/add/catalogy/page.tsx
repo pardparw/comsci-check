@@ -55,7 +55,7 @@ function page() {
 
     try {
 
-      let response = await fetch(`http://${process.env.DOMAIN}:3002/catalogy/add`, {
+      let response = await fetch(`/api/catalogy/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -121,7 +121,7 @@ function page() {
     formDatas.append("image", selectedFile);
 
     try {
-      const response = await fetch(`http://${process.env.DOMAIN}:3002/upload`, {
+      const response = await fetch(`/api/upload`, {
         method: "POST",
         body: formDatas,
       });

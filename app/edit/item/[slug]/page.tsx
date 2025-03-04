@@ -60,7 +60,12 @@ export default function Page({
 
                 // Use environment variable safely with fallback
 
-                const response = await fetch(`http://${process.env.DOMAIN}:3002/item/item/${slug}`);
+                const response = await fetch(`/api/item/item`,{
+                    method: "POST",
+                    body: JSON.stringify({
+                        oId : slug
+                    })
+                });
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -169,8 +174,8 @@ export default function Page({
 
         try {
 
-            let response = await fetch(`http://${process.env.DOMAIN}:3002/item/update`, {
-                method: "PUT",
+            let response = await fetch(`/api/item/update`, {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -241,7 +246,7 @@ export default function Page({
         formDatas.append("image", selectedFile!);
 
         try {
-            const response = await fetch(`http://${process.env.DOMAIN}:3002/upload`, {
+            const response = await fetch(`/api/upload`, {
                 method: "POST",
                 body: formDatas,
             });

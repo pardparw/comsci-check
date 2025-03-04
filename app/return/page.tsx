@@ -15,7 +15,15 @@ import { checkCookie } from '../utils/checkCookie'
 const fetchData = async (cookie: any, setBorrowItem: Function, setError: Function, setIsLoading: Function) => {
     try {
         setIsLoading(true);
-        const response = await fetch(`http://${process.env.DOMAIN}:3002/borrow/all/${cookie}`);
+        const response = await fetch(`/api/borrow/all`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    uId: cookie
+                })
+            }
+        );
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -98,8 +106,12 @@ function page() {
 
         // Update the state with filtered data (assuming setBorrowItem is the function to update state)
         try {
-            const response = await fetch(`http://${process.env.DOMAIN}:3002/borrow/return/${bId}`, {
-                method: "PUT",
+            const response = await fetch(`/api/borrow/return`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    bId : bId
+                })
             });
 
             if (!response.ok) {
@@ -118,7 +130,7 @@ function page() {
 
             })
 
-            
+
         } catch (error: any) {
             console.error("Error sending request:", error);
 

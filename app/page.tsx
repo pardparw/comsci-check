@@ -30,7 +30,7 @@ export default function Home() {
 
   useEffect(() => {
 
-    
+
     SetCookie(checkCookie()!)
     SetRole(LoadRole()!)
 
@@ -110,10 +110,14 @@ export default function Home() {
     try {
 
 
-      let response = await fetch(`/api/catalogy${tId}`, {
-        method: "DELETE",
+      let response = await fetch(`/api/catalogy/delete`, {
+        method: "POST",
         mode: "cors",
-        referrerPolicy: "unsafe-url"
+        referrerPolicy: "unsafe-url",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          "tId": tId
+        })
       });
 
       if (!response.ok) {
