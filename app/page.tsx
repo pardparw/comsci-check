@@ -38,7 +38,7 @@ export default function Home() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`http://${process.env.DOMAIN}:3002/catalogy/all`, {
+        const response = await fetch(`/api/catalogy/all`, {
           mode: "cors",
           referrerPolicy: "unsafe-url",
         });

@@ -14,7 +14,14 @@ const nextConfig: NextConfig = {
     DOMAIN: "app.sa.ac.th",
 
   },
-  
+  async rewrites() {
+    return [
+      {
+        source: "/api/catalogy/all",
+        destination: "http://app.sa.ac.th:3002/catalogy/all",
+      },
+    ];
+  },
 };
 
 
