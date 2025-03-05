@@ -177,7 +177,11 @@ export default function Page({
                 <div className="mt-[2.5cm] flex justify-center items-center flex-col">
                     <div className="bg-white rounded-xl shadow-lg w-[230px]">
 
-                        <Image className="w-[100%] h-[5cm] rounded-xl" src={`http://${process.env.DOMAIN}/comsci_chi/add/uploads/${!isLoading ? items[0]["oImg"] : "icon_67c1a6be4dcaf.png"}`} alt="" width={1000} height={20} />
+                        {isLoading ? (
+                            <div className="skeleton w-[100%] h-[5cm] rounded-xl"></div>
+                        ) : (
+                            <Image className="w-[100%] h-[5cm] rounded-xl" src={`http://${process.env.DOMAIN}/comsci_chi/add/uploads/${items[0]["oImg"]}`} alt="" width={1000} height={20} />
+                        )}
 
                     </div>
                     <input className="mt-4 w-[80%] h-[45px] rounded-3xl bg-white solid outline-[#71C55D] outline text-center" name="reason" value={formData.reason} onChange={handleChange} placeholder={`เหตุผลที่ยืม ${!isLoading ? items[0]["oName"] : ""}`} />
